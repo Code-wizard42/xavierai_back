@@ -32,6 +32,7 @@ from flask_compress import Compress
 import functools
 import ensure_env as ensure_env
 from utils.log_utils import log_api_request
+from datetime import datetime
 
 # Set environment variable for development mode
 if not os.environ.get('FLASK_ENV') and not os.environ.get('ENVIRONMENT'):
@@ -465,12 +466,21 @@ def create_app(test_config=None):
 
     @app.route('/health')
     def health_check():
-        """Health check endpoint."""
-        return jsonify({
-            "status": "healthy",
-            "database": "connected",
-            "timestamp": time.time()
-        })
+        """Health check endpoint for deployment monitoring"""
+        try:
+            # Basic health checks
+            return {
+                'status': 'healthy',
+                'timestamp': datetime.now().isoformat(),
+                'service': 'xavier-ai-backend',
+                'version': '1.0.0'
+            }, 200
+        except Exception as e:
+            return {
+                'status': 'unhealthy',
+                'error': str(e),
+                'timestamp': datetime.now().isoformat()
+            }, 503
 
     @app.route('/subscription-status')
     def subscription_status():
