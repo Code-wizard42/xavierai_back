@@ -19,6 +19,7 @@ health_check:
 # Environment
 environment:
   - FLASK_ENV=production
+  - ENVIRONMENT=production
   - PYTHONPATH=/app
 
 # Resources

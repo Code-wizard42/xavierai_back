@@ -64,8 +64,16 @@ def create_app(test_config=None):
     # Configure logging with the app
     configure_logging(app)
 
-    # Ensure instance folder exists
-    os.makedirs(app.instance_path, exist_ok=True)
+    # Ensure instance folder exists (only if writable)
+    try:
+        os.makedirs(app.instance_path, exist_ok=True)
+    except PermissionError:
+        logger.warning(f"Cannot create instance directory at {app.instance_path}, using temp directory")
+        # Use a temp directory instead
+        import tempfile
+        app.instance_path = tempfile.gettempdir()
+    except Exception as e:
+        logger.warning(f"Error creating instance directory: {str(e)}")
 
     # Configure CORS
     CORS(app, supports_credentials=True, 
