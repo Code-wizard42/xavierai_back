@@ -1,4 +1,4 @@
-# Absolute essentials only
+# Core Flask and Web Framework (Essential)
 Flask==2.3.3
 Flask-CORS==4.0.0
 Flask-SQLAlchemy==3.0.5
@@ -7,4 +7,24 @@ psycopg2-binary==2.9.7
 requests>=2.31.0
 PyJWT==2.8.0
 python-dotenv>=1.0.0
-gunicorn>=21.2.0 
+gunicorn>=21.2.0
+
+# Critical for API validation (lightweight)
+marshmallow>=3.20.1
+
+# Critical for basic text processing (lightweight)
+beautifulsoup4>=4.12.2
+
+# AI and NLP (Essential for chatbot)
+openai>=0.28.1
+numpy>=1.24.3
+nltk>=3.8.1
+
+# Vector Database (for knowledge base)
+qdrant-client>=1.6.0
+
+# PDF Processing (for document uploads)
+PyMuPDF>=1.23.3
+
+# Note: FAISS removed - using Qdrant with text similarity fallback
+# Note: sentence-transformers REMOVED (using Together AI instead) 
