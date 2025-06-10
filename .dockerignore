@@ -1,0 +1,58 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache
+.coverage
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs and databases
+*.log
+*.db
+*.sqlite3
+logs/
+instance/
+flask_session/
+
+# Vector databases (large files)
+vector_db/
+*.faiss
+
+# Uploads
+uploads/
+
+# Documentation
+docs/
+README.md
+
+# Requirements (we only need the minimal one)
+requirements-minimal.txt
+requirements-ultra-minimal.txt
+
+# Node modules (if any)
+node_modules/
+
+# Large files
+*.zip
+*.tar.gz
+*.pdf 
