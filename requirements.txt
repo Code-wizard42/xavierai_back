@@ -16,6 +16,9 @@ redis>=4.3.4
 pymongo>=4.5.0
 stripe>=6.5.0
 Flask-APScheduler>=1.13.0
+resend>=0.7.0
+cohere>=4.30.0
+together>=0.2.7
 
 # Critical for API validation (lightweight)
 marshmallow>=3.20.1
