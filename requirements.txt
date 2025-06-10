@@ -1,0 +1,71 @@
+# Core Flask and Web Framework
+Flask==2.3.3
+Flask-CORS==4.0.0
+Flask-SQLAlchemy==3.0.5
+Flask-Migrate==4.0.5
+Flask-Session==0.5.0
+Flask-Compress==1.13
+
+# Database
+SQLAlchemy==2.0.21
+psycopg2-binary==2.9.7
+alembic==1.12.0
+
+# Authentication & Security
+firebase-admin==6.2.0
+PyJWT==2.8.0
+Werkzeug==2.3.7
+
+# Session Storage
+redis==4.6.0
+
+# API & HTTP
+requests==2.31.0
+urllib3==2.0.4
+
+# AI & Vector Database
+openai==0.28.1
+qdrant-client==1.5.4
+sentence-transformers==2.2.2
+
+# File Processing
+python-multipart==0.0.6
+Pillow==10.0.0
+
+# Utilities
+python-dotenv==1.0.0
+python-dateutil==2.8.2
+pytz==2023.3
+
+# Production Server
+gunicorn==21.2.0
+
+# Monitoring & Logging
+APScheduler==3.10.4
+
+# Data Processing & Scientific Computing
+numpy==1.24.3
+
+# Natural Language Processing
+nltk==3.8.1
+
+# MongoDB Support
+pymongo==4.4.1
+
+# PDF Processing
+PyMuPDF==1.23.3
+
+# Web Scraping
+beautifulsoup4==4.12.2
+
+# Data Validation & Serialization
+marshmallow==3.20.1
+
+# Task Scheduling (Flask extension)
+Flask-APScheduler==1.13.0
+
+# Payment Processing
+stripe==5.5.0
+
+# FAISS Vector Database (optional, for local vector search)
+faiss-cpu==1.7.4 
