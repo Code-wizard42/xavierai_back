@@ -9,11 +9,11 @@ from datetime import datetime, timezone
 import logging
 from functools import wraps
 
-from xavier_back.models import QuestionAnalytics, SentimentAnalytics
-from xavier_back.extensions import db
-from xavier_back.services.analytics_service import AnalyticsService
-from xavier_back.utils.auth_utils import login_required
-from xavier_back.middleware.subscription_middleware import subscription_required
+from models import QuestionAnalytics, SentimentAnalytics
+from extensions import db
+from services.analytics_service import AnalyticsService
+from utils.auth_utils import login_required
+from middleware.subscription_middleware import subscription_required
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR)

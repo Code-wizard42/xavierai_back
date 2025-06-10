@@ -12,8 +12,8 @@ from datetime import datetime, timezone
 import stripe
 from sqlalchemy.exc import SQLAlchemyError
 
-from xavier_back.extensions import db
-from xavier_back.models import User, Subscription, Plan, PaymentHistory
+from extensions import db
+from models import User, Subscription, Plan, PaymentHistory
 
 # Configure logging
 logger = logging.getLogger(__name__)

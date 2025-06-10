@@ -100,7 +100,7 @@ class EmailService:
         """
         try:
             # First check if the user has notification preferences
-            from xavier_back.models import User, NotificationPreference
+            from models import User, NotificationPreference
 
             # Check if the user has notification preferences
             pref = NotificationPreference.query.filter_by(user_id=user_id).first()

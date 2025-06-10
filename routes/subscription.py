@@ -13,10 +13,10 @@ from datetime import datetime, timezone
 from flask import Blueprint, request, jsonify, session, current_app
 from sqlalchemy.exc import SQLAlchemyError
 
-from xavier_back.extensions import db
-from xavier_back.models import User, Subscription, Plan, PaymentHistory
-from xavier_back.services.subscription_service import SubscriptionService
-from xavier_back.utils.auth_utils import login_required
+from extensions import db
+from models import User, Subscription, Plan, PaymentHistory
+from services.subscription_service import SubscriptionService
+from utils.auth_utils import login_required
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -113,7 +113,7 @@ def create_paypal_order():
         price = plan.annual_price if billing_cycle == 'annual' else plan.price
 
         # Create a PayPal order
-        from xavier_back.services.paypal_service import PayPalService
+        from services.paypal_service import PayPalService
 
         success, order_data, error = PayPalService.create_order(
             plan_id=plan_id,
@@ -240,7 +240,7 @@ def capture_paypal_order():
         logger.info(f"Capturing PayPal order {order_id} for user {user_id}")
 
         # Capture the PayPal order
-        from xavier_back.services.paypal_service import PayPalService
+        from services.paypal_service import PayPalService
 
         success, capture_data, error = PayPalService.capture_order(order_id)
 
@@ -371,7 +371,7 @@ def create_subscription():
                 return jsonify({"error": "Failed to create subscription"}), 500
         else:
             # Use the PayPal service to create a subscription
-            from xavier_back.services.paypal_service import PayPalService
+            from services.paypal_service import PayPalService
 
             # If we have an order ID, use that instead of a subscription ID
             if paypal_order_id:
@@ -423,7 +423,7 @@ def cancel_subscription():
     if subscription_data.get('plan', {}).get('price', 0) > 0:
         if payment_method == 'paypal' and subscription_data.get('paypal_subscription_id'):
             # Use the PayPal service to cancel the subscription
-            from xavier_back.services.paypal_service import PayPalService
+            from services.paypal_service import PayPalService
             success, error = PayPalService.cancel_subscription(subscription_data.get('paypal_subscription_id'))
 
             # If successful, update the subscription status in the database
@@ -631,7 +631,7 @@ def process_lemonsqueezy_order():
     try:
         # Create subscription using PayPal service's create_subscription_with_paypal method
         # This ensures proper handling of the subscription status and payment records
-        from xavier_back.services.paypal_service import PayPalService
+        from services.paypal_service import PayPalService
         
         # Format the order ID to indicate it's from Lemon Squeezy
         ls_order_id = f"LS-{order_id}"
@@ -860,7 +860,7 @@ def process_flutterwave_order():
     try:
         # Create subscription using PayPal service's create_subscription_with_paypal method
         # This ensures proper handling of the subscription status and payment records
-        from xavier_back.services.paypal_service import PayPalService
+        from services.paypal_service import PayPalService
         
         # Format the transaction ID to indicate it's from Flutterwave
         fw_transaction_id = f"FW-{transaction_id}"

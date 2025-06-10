@@ -10,10 +10,10 @@ import json
 import logging
 from sqlalchemy.exc import SQLAlchemyError
 
-from xavier_back.extensions import db
-from xavier_back.models import Chatbot
-from xavier_back.models.whatsapp import WhatsAppIntegration
-from xavier_back.utils.auth_utils import login_required
+from extensions import db
+from models import Chatbot
+from models.whatsapp import WhatsAppIntegration
+from utils.auth_utils import login_required
 
 # Set up logger
 logger = logging.getLogger(__name__)

@@ -5,7 +5,7 @@ This module defines the database model for WhatsApp integration.
 """
 from datetime import datetime
 import datetime as dt
-from xavier_back.extensions import db
+from extensions import db
 
 class WhatsAppIntegration(db.Model):
     """

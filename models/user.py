@@ -1,4 +1,4 @@
-from xavier_back.extensions import db
+from extensions import db
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import datetime as dt

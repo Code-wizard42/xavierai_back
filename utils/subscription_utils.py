@@ -8,7 +8,7 @@ import functools
 from typing import Callable, Any, Dict, List, Optional
 
 from flask import request, jsonify, session, current_app
-from xavier_back.services.subscription_service import SubscriptionService
+from services.subscription_service import SubscriptionService
 
 # Configure logging
 logger = logging.getLogger(__name__)

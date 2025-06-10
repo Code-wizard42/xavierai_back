@@ -1,4 +1,4 @@
-from xavier_back.extensions import db
+from extensions import db
 from datetime import datetime, timezone
 from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import JSON  # Import JSON type if using PostgreSQL
@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import Text, Enum
 from sqlalchemy.dialects import postgresql
 import uuid
-from xavier_back.models.whatsapp import WhatsAppIntegration
+from models.whatsapp import WhatsAppIntegration
 
 
 class TicketResponse(db.Model):

@@ -20,14 +20,14 @@ from difflib import SequenceMatcher
 import random
 
 # Import our custom services
-from xavier_back.utils.vector_db import vector_db
-from xavier_back.utils.text_processing import text_processor
-from xavier_back.utils.embedding_service import embedding_service
-from xavier_back.utils.cache_utils import cached, cache
-from xavier_back.utils.response_formatter import response_formatter
-from xavier_back.extensions import db
-from xavier_back.models.question_analytics import QuestionAnalytics
-from xavier_back.models.sentiment_analytics import SentimentAnalytics
+from utils.vector_db import vector_db
+from utils.text_processing import text_processor
+from utils.embedding_service import embedding_service
+from utils.cache_utils import cached, cache
+from utils.response_formatter import response_formatter
+from extensions import db
+from models.question_analytics import QuestionAnalytics
+from models.sentiment_analytics import SentimentAnalytics
 
 # Load environment variables
 load_dotenv()

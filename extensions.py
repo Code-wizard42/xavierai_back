@@ -39,7 +39,7 @@ def init_scheduler(app):
     scheduler.init_app(app)
     
     # Add scheduled tasks
-    from xavier_back.utils.scheduled_tasks import run_daily_tasks
+    from utils.scheduled_tasks import run_daily_tasks
     
     # Wrap the daily tasks with app context
     def run_daily_tasks_with_context():

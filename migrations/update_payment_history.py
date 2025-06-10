@@ -3,8 +3,8 @@ Migration script to update payment_history table by making subscription_id nulla
 """
 import logging
 from sqlalchemy.sql import text
-from xavier_back.extensions import db
-from xavier_back.models import User, Subscription, PaymentHistory
+from extensions import db
+from models import User, Subscription, PaymentHistory
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,7 @@ Schemas Module
 This module contains marshmallow schemas for serializing and deserializing models.
 """
 from marshmallow import Schema, fields, validate, ValidationError, post_load
-from xavier_back.models import User, Chatbot, NotificationPreference, Plan, Subscription, PaymentHistory
+from models import User, Chatbot, NotificationPreference, Plan, Subscription, PaymentHistory
 
 class UserSchema(Schema):
     """Schema for User model"""

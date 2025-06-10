@@ -13,7 +13,7 @@ from sqlalchemy.exc import OperationalError, SQLAlchemyError
 from sqlalchemy import text, func
 from sqlalchemy.orm.query import Query
 
-from xavier_back.extensions import db
+from extensions import db
 
 # Configure logger
 logger = logging.getLogger(__name__)

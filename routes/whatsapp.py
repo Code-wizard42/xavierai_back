@@ -14,10 +14,10 @@ import logging
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 
-from xavier_back.extensions import db
-from xavier_back.models import Chatbot, ConversationMessage
-from xavier_back.services.chatbot_service import ChatbotService
-from xavier_back.services.subscription_service import SubscriptionService
+from extensions import db
+from models import Chatbot, ConversationMessage
+from services.chatbot_service import ChatbotService
+from services.subscription_service import SubscriptionService
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ def webhook():
             clean_phone = sender_phone
 
         # Import WhatsAppIntegration model
-        from xavier_back.models.whatsapp import WhatsAppIntegration
+        from models.whatsapp import WhatsAppIntegration
 
         # Look up the chatbot ID based on the WhatsApp number
         whatsapp_integration = WhatsAppIntegration.query.filter_by(
@@ -88,7 +88,7 @@ def webhook():
                 return str(resp)
 
             # Check for billing overdue
-            from xavier_back.models import User
+            from models import User
             user = User.query.get(chatbot.user_id)
             if user and user.subscription and user.subscription.is_billing_overdue():
                 logger.warning(f"WhatsApp message blocked for chatbot {chatbot_id} - billing overdue")

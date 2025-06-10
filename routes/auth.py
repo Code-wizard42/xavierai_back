@@ -11,11 +11,11 @@ from flask_cors import cross_origin
 from flask import current_app
 from werkzeug.security import check_password_hash
 
-from xavier_back.models import User
-from xavier_back.extensions import db
-from xavier_back.services.auth_service import AuthService
-from xavier_back.services.subscription_service import SubscriptionService
-from xavier_back.utils.log_utils import log_operation
+from models import User
+from extensions import db
+from services.auth_service import AuthService
+from services.subscription_service import SubscriptionService
+from utils.log_utils import log_operation
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR)

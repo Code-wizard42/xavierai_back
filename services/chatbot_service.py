@@ -14,13 +14,13 @@ from typing import Dict, List, Any, Optional, Union, Tuple
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
 
-from xavier_back.extensions import db
-from xavier_back.models import Chatbot, ConversationMessage
-from xavier_back.utils.nlp_utils_enhanced import get_enhanced_answer, preprocess_and_index_data, parse_chatbot_data
-from xavier_back.utils.file_utils import extract_text_from_pdf, read_text_file, extract_folder_content, extract_text_from_url
-from xavier_back.utils.api_utils import fetch_real_time_data
-from xavier_back.utils.cache_utils import cached, cache
-from xavier_back.utils.vector_db import vector_db
+from extensions import db
+from models import Chatbot, ConversationMessage
+from utils.nlp_utils_enhanced import get_enhanced_answer, preprocess_and_index_data, parse_chatbot_data
+from utils.file_utils import extract_text_from_pdf, read_text_file, extract_folder_content, extract_text_from_url
+from utils.api_utils import fetch_real_time_data
+from utils.cache_utils import cached, cache
+from utils.vector_db import vector_db
 
 logger = logging.getLogger(__name__)
 
@@ -103,16 +103,16 @@ class ChatbotService:
             # This is necessary because these tables have NOT NULL constraints on chatbot_id
 
             # Delete conversation messages
-            from xavier_back.models import ConversationMessage
+            from models import ConversationMessage
             ConversationMessage.query.filter_by(chatbot_id=chatbot_id).delete()
 
             # Delete feedback records
-            from xavier_back.models import Feedback
+            from models import Feedback
             Feedback.query.filter_by(chatbot_id=chatbot_id).delete()
 
             # Delete tickets
             try:
-                from xavier_back.models import Ticket
+                from models import Ticket
                 Ticket.query.filter_by(chatbot_id=chatbot_id).delete()
             except Exception as e:
                 logger.warning(f"Error deleting tickets for chatbot {chatbot_id}: {str(e)}")
@@ -120,7 +120,7 @@ class ChatbotService:
 
             # Delete question analytics if they exist
             try:
-                from xavier_back.models import QuestionAnalytics
+                from models import QuestionAnalytics
                 QuestionAnalytics.query.filter_by(chatbot_id=chatbot_id).delete()
             except Exception as e:
                 logger.warning(f"Error deleting question analytics for chatbot {chatbot_id}: {str(e)}")
@@ -128,7 +128,7 @@ class ChatbotService:
 
             # Delete chatbot avatars
             try:
-                from xavier_back.models import ChatbotAvatar
+                from models import ChatbotAvatar
                 ChatbotAvatar.query.filter_by(chatbot_id=chatbot_id).delete()
             except Exception as e:
                 logger.warning(f"Error deleting avatars for chatbot {chatbot_id}: {str(e)}")
@@ -293,7 +293,7 @@ class ChatbotService:
 
             # Record conversation for usage tracking
             try:
-                from xavier_back.services.conversation_limit_service import ConversationLimitService
+                from services.conversation_limit_service import ConversationLimitService
                 ConversationLimitService.record_conversation(chatbot_id)
             except Exception as e:
                 logger.error(f"Error recording conversation usage for chatbot {chatbot_id}: {str(e)}")
@@ -394,7 +394,7 @@ class ChatbotService:
                         
                         if file_extension == '.docx':
                             # Use DOCX extraction function
-                            from xavier_back.utils.file_utils import extract_text_from_docx
+                            from utils.file_utils import extract_text_from_docx
                             docx_data = extract_text_from_docx(text_file_path)
                             for item in docx_data:
                                 if item.get('text'):
@@ -406,7 +406,7 @@ class ChatbotService:
                             logger.info(f"Successfully processed DOCX file: {text_file_path}")
                         elif file_extension == '.doc':
                             # Use DOC extraction function
-                            from xavier_back.utils.file_utils import extract_text_from_doc
+                            from utils.file_utils import extract_text_from_doc
                             doc_data = extract_text_from_doc(text_file_path)
                             for item in doc_data:
                                 if item.get('text'):
@@ -678,7 +678,7 @@ class ChatbotService:
             
             # Clear any cached data for this chatbot
             try:
-                from xavier_back.utils.cache_utils import cache_invalidate
+                from utils.cache_utils import cache_invalidate
                 cache_key_prefix = f"chatbot:{chatbot_id}"
                 cache_invalidate(cache_key_prefix)
                 logger.info(f"Invalidated cache for prefix {cache_key_prefix}")

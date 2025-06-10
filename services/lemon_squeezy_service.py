@@ -9,9 +9,9 @@ import logging
 from typing import Dict, Any, Optional, Tuple
 from datetime import datetime, timezone
 
-from xavier_back.extensions import db
-from xavier_back.models import User, Subscription, Plan, PaymentHistory
-from xavier_back.config import Config
+from extensions import db
+from models import User, Subscription, Plan, PaymentHistory
+from config import Config
 
 logger = logging.getLogger(__name__)
 

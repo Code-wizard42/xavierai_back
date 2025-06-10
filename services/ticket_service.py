@@ -11,8 +11,8 @@ from flask import current_app
 from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
 
-from xavier_back.extensions import db
-from xavier_back.models import Ticket, TicketResponse, User, Chatbot
+from extensions import db
+from models import Ticket, TicketResponse, User, Chatbot
 
 logger = logging.getLogger(__name__)
 

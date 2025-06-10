@@ -27,7 +27,7 @@ def check_subscription_renewals():
         logger.info("Checking for subscription renewals")
         
         # Import here to avoid circular imports
-        from xavier_back.services.subscription_service import SubscriptionService
+        from services.subscription_service import SubscriptionService
         
         # We need to ensure we're in an application context
         try:

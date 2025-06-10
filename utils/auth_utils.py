@@ -3,7 +3,7 @@ from functools import wraps
 import logging
 import base64
 import json
-from xavier_back.utils.log_utils import log_operation
+from utils.log_utils import log_operation
 
 def login_required(f):
     """
@@ -20,8 +20,8 @@ def login_required(f):
             if auth_header and auth_header.startswith('Bearer '):
                 token = auth_header.split(' ')[1]
                 try:
-                    from xavier_back.firebase_config import verify_firebase_token
-                    from xavier_back.models import User
+                    from firebase_config import verify_firebase_token
+                    from models import User
                     
                     user_info = verify_firebase_token(token)
                     if user_info.get('verified'):

@@ -9,10 +9,10 @@ import logging
 import os
 from functools import wraps
 
-from xavier_back.models import Ticket
-from xavier_back.extensions import db
-from xavier_back.services.email_service import EmailService
-from xavier_back.utils.auth_utils import login_required
+from models import Ticket
+from extensions import db
+from services.email_service import EmailService
+from utils.auth_utils import login_required
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR)

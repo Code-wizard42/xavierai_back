@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional, Union
 import numpy as np
 
 # Import the fallback utilities
-from xavier_back.utils.fallback import search_text_similarity
+from utils.fallback import search_text_similarity
 
 # Import Qdrant client
 try:

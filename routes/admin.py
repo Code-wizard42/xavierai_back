@@ -3,8 +3,8 @@ Admin Routes for Database Management
 """
 
 from flask import Blueprint, request, jsonify
-from xavier_back.extensions import db
-from xavier_back.models.plan import Plan
+from extensions import db
+from models.plan import Plan
 
 admin_bp = Blueprint('admin', __name__)
 

@@ -15,16 +15,16 @@ from flask_cors import cross_origin, CORS
 from PIL import Image
 import time
 
-from xavier_back.models import Chatbot, ChatbotAvatar, Feedback
-from xavier_back.extensions import db
-from xavier_back.services.chatbot_service import ChatbotService
-from xavier_back.services.analytics_service import AnalyticsService
-from xavier_back.services.ticket_service import TicketService
-from xavier_back.utils.auth_utils import login_required
-from xavier_back.utils.response_utils import optimize_json_response, paginated_response, with_pagination
-from xavier_back.utils.subscription_utils import check_chatbot_limit
-from xavier_back.middleware.subscription_middleware import subscription_required
-from xavier_back.middleware.chatbot_access_middleware import public_chatbot_subscription_required
+from models import Chatbot, ChatbotAvatar, Feedback
+from extensions import db
+from services.chatbot_service import ChatbotService
+from services.analytics_service import AnalyticsService
+from services.ticket_service import TicketService
+from utils.auth_utils import login_required
+from utils.response_utils import optimize_json_response, paginated_response, with_pagination
+from utils.subscription_utils import check_chatbot_limit
+from middleware.subscription_middleware import subscription_required
+from middleware.chatbot_access_middleware import public_chatbot_subscription_required
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR)
@@ -433,7 +433,7 @@ def get_chatbot_customization(chatbot_id):
         current_app.logger.info(f"Getting customization settings for chatbot {chatbot_id}")
         
         # Use service to get chatbot but skip cache to ensure we have latest data
-        from xavier_back.utils.cache_utils import cache_invalidate
+        from utils.cache_utils import cache_invalidate
         cache_key_prefix = f"chatbot:{chatbot_id}"
         cache_invalidate(cache_key_prefix)
         current_app.logger.info(f"Invalidated cache for prefix {cache_key_prefix}")

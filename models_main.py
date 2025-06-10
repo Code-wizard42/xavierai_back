@@ -1,4 +1,4 @@
-from xavier_back.extensions import db
+from extensions import db
 from sqlalchemy.dialects.postgresql import JSON  # Import JSON type if using PostgreSQL
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.dialects.postgresql import JSONB
@@ -9,7 +9,7 @@ from sqlalchemy.dialects import postgresql
 import uuid
 
 # Import WhatsApp model
-from xavier_back.models.whatsapp import WhatsAppIntegration
+from models.whatsapp import WhatsAppIntegration
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(128), unique=True, nullable=False)

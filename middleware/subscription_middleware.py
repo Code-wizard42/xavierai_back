@@ -5,7 +5,7 @@ This module provides middleware for verifying subscription status on protected r
 """
 from functools import wraps
 from flask import request, jsonify, session, current_app
-from xavier_back.services.subscription_service import SubscriptionService
+from services.subscription_service import SubscriptionService
 
 def subscription_required(feature=None):
     """
