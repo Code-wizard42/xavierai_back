@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional, Union
 import numpy as np
 
 # Import the fallback utilities
-from utils.fallback import search_text_similarity
+from xavier_back.utils.fallback import search_text_similarity
 
 # Import Qdrant client
 try:
@@ -20,16 +20,8 @@ try:
     QDRANT_AVAILABLE = True
 except ImportError:
     QDRANT_AVAILABLE = False
-    logging.warning("Qdrant not installed. Using text similarity fallback.")
-
-# FAISS is optional and only used if Qdrant is not available
-FAISS_AVAILABLE = False
-try:
+    logging.warning("Qdrant not installed. Using fallback local FAISS implementation.")
     import faiss
-    FAISS_AVAILABLE = True
-    logging.info("FAISS available as secondary fallback")
-except ImportError:
-    logging.info("FAISS not available - using text similarity fallback only")
 
 class VectorDBService:
     """Service for managing vector embeddings and similarity search."""
@@ -72,11 +64,8 @@ class VectorDBService:
                 # We'll discover collections dynamically as they are accessed
                 logging.info("Will discover collections dynamically as they are accessed")
         else:
-            # Fallback to FAISS (if available) or text similarity
-            if FAISS_AVAILABLE:
-                self._init_faiss()
-            else:
-                logging.info("Using text similarity fallback only (no vector database)")
+            # Fallback to FAISS
+            self._init_faiss()
 
         # Store raw texts for fallback text search
         self.text_stores = {}
@@ -147,51 +136,44 @@ class VectorDBService:
                 else:
                     logging.info(f"Collection {collection_name} already exists in Qdrant")
             else:
-                # Create FAISS index if FAISS is available
-                if FAISS_AVAILABLE:
-                    if collection_name not in self.indexes:
-                        # Try to load from disk first
-                        index_path = f"vector_db/faiss/{collection_name}.index"
-                        metadata_path = f"vector_db/faiss/{collection_name}_metadata.json"
-                        text_path = f"vector_db/faiss/{collection_name}_texts.json"
+                # Create FAISS index if it doesn't exist
+                if collection_name not in self.indexes:
+                    # Try to load from disk first
+                    index_path = f"vector_db/faiss/{collection_name}.index"
+                    metadata_path = f"vector_db/faiss/{collection_name}_metadata.json"
+                    text_path = f"vector_db/faiss/{collection_name}_texts.json"
 
-                        if os.path.exists(index_path):
-                            try:
-                                self.indexes[collection_name] = faiss.read_index(index_path)
-                                logging.info(f"Loaded existing FAISS index for {collection_name} with {self.indexes[collection_name].ntotal} vectors")
+                    if os.path.exists(index_path):
+                        try:
+                            self.indexes[collection_name] = faiss.read_index(index_path)
+                            logging.info(f"Loaded existing FAISS index for {collection_name} with {self.indexes[collection_name].ntotal} vectors")
 
-                                # Load metadata and texts if available
-                                if os.path.exists(metadata_path):
-                                    with open(metadata_path, 'r') as f:
-                                        self.metadata_stores[collection_name] = json.load(f)
-                                else:
-                                    self.metadata_stores[collection_name] = []
-
-                                if os.path.exists(text_path):
-                                    with open(text_path, 'r') as f:
-                                        self.text_stores[collection_name] = json.load(f)
-                                else:
-                                    self.text_stores[collection_name] = []
-                            except Exception as load_error:
-                                logging.error(f"Error loading FAISS index for {collection_name}: {str(load_error)}")
-                                # Create new index if loading fails
-                                self.indexes[collection_name] = faiss.IndexFlatL2(vector_size)
+                            # Load metadata and texts if available
+                            if os.path.exists(metadata_path):
+                                with open(metadata_path, 'r') as f:
+                                    self.metadata_stores[collection_name] = json.load(f)
+                            else:
                                 self.metadata_stores[collection_name] = []
+
+                            if os.path.exists(text_path):
+                                with open(text_path, 'r') as f:
+                                    self.text_stores[collection_name] = json.load(f)
+                            else:
                                 self.text_stores[collection_name] = []
-                        else:
-                            # Create new index
+                        except Exception as load_error:
+                            logging.error(f"Error loading FAISS index for {collection_name}: {str(load_error)}")
+                            # Create new index if loading fails
                             self.indexes[collection_name] = faiss.IndexFlatL2(vector_size)
                             self.metadata_stores[collection_name] = []
                             self.text_stores[collection_name] = []
-                            logging.info(f"Created new FAISS index for {collection_name} with vector size {vector_size}")
                     else:
-                        logging.info(f"FAISS index for {collection_name} already exists in memory")
-                else:
-                    # FAISS not available, initialize text stores for fallback
-                    if collection_name not in self.text_stores:
-                        self.text_stores[collection_name] = []
+                        # Create new index
+                        self.indexes[collection_name] = faiss.IndexFlatL2(vector_size)
                         self.metadata_stores[collection_name] = []
-                        logging.info(f"Initialized text stores for {collection_name} (text similarity fallback mode)")
+                        self.text_stores[collection_name] = []
+                        logging.info(f"Created new FAISS index for {collection_name} with vector size {vector_size}")
+                else:
+                    logging.info(f"FAISS index for {collection_name} already exists in memory")
             return True
         except Exception as e:
             logging.error(f"Error creating collection {collection_name}: {str(e)}")
