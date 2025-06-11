@@ -8,11 +8,11 @@ import logging
 import time
 from flask import Flask, request, jsonify, make_response, session
 from flask_cors import CORS
-from xavier_back.config import Config
-from xavier_back.extensions import db, migrate
-from xavier_back.routes.auth import auth_bp
-from xavier_back.routes.chatbot import chatbot_bp
-from xavier_back.models import User
+from config import Config
+from extensions import db, migrate
+from routes.auth import auth_bp
+from routes.chatbot import chatbot_bp
+from models import User
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_session import Session
 

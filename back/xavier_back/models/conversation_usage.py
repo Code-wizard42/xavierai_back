@@ -1,4 +1,4 @@
-from xavier_back.extensions import db
+from extensions import db
 from datetime import datetime, timezone
 from sqlalchemy import Index
 

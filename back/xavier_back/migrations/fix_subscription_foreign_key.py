@@ -4,7 +4,7 @@ This adds ON DELETE CASCADE to the subscription_user_id_fkey constraint.
 """
 import logging
 from sqlalchemy import create_engine, text, inspect
-from xavier_back.config import Config
+from config import Config
 
 logger = logging.getLogger(__name__)
 

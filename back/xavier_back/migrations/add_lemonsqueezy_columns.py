@@ -4,7 +4,7 @@ Migration script to add Lemon Squeezy-related columns to the subscription table.
 import logging
 from sqlalchemy import Column, String
 from sqlalchemy.sql import text
-from xavier_back.extensions import db
+from extensions import db
 
 logger = logging.getLogger(__name__)
 

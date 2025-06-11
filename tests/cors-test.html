@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CORS Test</title>
+</head>
+<body>
+    <h1>CORS Test to Xavier Backend</h1>
+    <button id="testBtn">Test OPTIONS Request</button>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('testBtn').addEventListener('click', function() {
+            // Test OPTIONS request first
+            fetch('http://localhost:5000/verify-firebase-token', {
+                method: 'OPTIONS',
+                headers: {
+                    'Origin': 'http://localhost:4200',
+                    'Access-Control-Request-Method': 'POST',
+                    'Access-Control-Request-Headers': 'Content-Type, Authorization'
+                }
+            })
+            .then(response => {
+                console.log('OPTIONS Response:', response);
+                document.getElementById('result').innerHTML = 
+                    `<p>OPTIONS Status: ${response.status} ${response.statusText}</p>
+                    <p>CORS Headers:</p>
+                    <pre>${
+                        Array.from(response.headers.entries())
+                            .map(([key, value]) => `${key}: ${value}`)
+                            .join('\n')
+                    }</pre>`;
+                
+                // Now test POST request
+                return fetch('http://localhost:5000/verify-firebase-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Origin': 'http://localhost:4200'
+                    },
+                    body: JSON.stringify({ idToken: 'test-token' }),
+                    credentials: 'include'
+                });
+            })
+            .then(response => {
+                console.log('POST Response:', response);
+                document.getElementById('result').innerHTML += 
+                    `<p>POST Status: ${response.status} ${response.statusText}</p>
+                    <p>CORS Headers:</p>
+                    <pre>${
+                        Array.from(response.headers.entries())
+                            .map(([key, value]) => `${key}: ${value}`)
+                            .join('\n')
+                    }</pre>`;
+                
+                return response.text();
+            })
+            .then(text => {
+                document.getElementById('result').innerHTML += 
+                    `<p>Response Body:</p>
+                    <pre>${text}</pre>`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML += 
+                    `<p>Error: ${error.message}</p>`;
+            });
+        });
+    </script>
+</body>
+</html> 

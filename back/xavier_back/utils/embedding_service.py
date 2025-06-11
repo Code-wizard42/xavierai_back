@@ -17,19 +17,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Try to import embedding providers
-OPENAI_AVAILABLE = False
 COHERE_AVAILABLE = False
 TOGETHER_AVAILABLE = False
-SENTENCE_TRANSFORMERS_AVAILABLE = False
-
-try:
-    import openai
-    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-    if OPENAI_API_KEY:
-        openai.api_key = OPENAI_API_KEY
-        OPENAI_AVAILABLE = True
-except ImportError:
-    pass
 
 try:
     import cohere
@@ -57,24 +46,18 @@ try:
 except ImportError:
     pass
 
-try:
-    from sentence_transformers import SentenceTransformer
-    SENTENCE_TRANSFORMERS_AVAILABLE = True
-except ImportError:
-    pass
-
 class EmbeddingService:
     """Service for generating and managing text embeddings."""
 
     def __init__(self,
                  provider: str = 'fallback',
                  model_name: str = None,
-                 embedding_dim: int = 384,
+                 embedding_dim: int = 768,
                  cache_size: int = 1000):
         """Initialize the embedding service.
 
         Args:
-            provider: Embedding provider ('openai', 'cohere', 'sentence-transformers', or 'fallback')
+            provider: Embedding provider ('together', 'cohere', or 'fallback')
             model_name: Specific model name for the provider
             embedding_dim: Dimension of embeddings (for fallback)
             cache_size: Size of the LRU cache for embeddings
@@ -92,39 +75,24 @@ class EmbeddingService:
 
     def _initialize_provider(self):
         """Initialize the embedding provider based on availability."""
-        # OPTIMIZATION: Prioritize local embeddings for speed
+        # OPTIMIZATION: Prioritize Together AI for speed and performance
         if self.provider == 'auto':
-            if SENTENCE_TRANSFORMERS_AVAILABLE:
-                self.provider = 'sentence-transformers'
-                self.model_name = 'all-MiniLM-L6-v2'
-                self.model = SentenceTransformer(self.model_name)
-                logging.info(f"AUTO-SELECTED: Sentence Transformers (LOCAL - FASTEST) with model {self.model_name}")
-                return
-            elif TOGETHER_AVAILABLE:
+            if TOGETHER_AVAILABLE:
                 self.provider = 'together'
                 self.model_name = 'togethercomputer/m2-bert-80M-8k-retrieval'
                 logging.info(f"AUTO-SELECTED: Together AI (OPTIMIZED) with model {self.model_name}")
                 return
-            elif OPENAI_AVAILABLE:
-                self.provider = 'openai'
-                self.model_name = 'text-embedding-3-small'
-                logging.info(f"AUTO-SELECTED: OpenAI with model {self.model_name}")
+            elif COHERE_AVAILABLE:
+                self.provider = 'cohere'
+                self.model_name = 'embed-english-v3.0'
+                logging.info(f"AUTO-SELECTED: Cohere with model {self.model_name}")
                 return
         
         # Manual provider selection
-        if self.provider == 'sentence-transformers' and SENTENCE_TRANSFORMERS_AVAILABLE:
-            self.model_name = self.model_name or 'all-MiniLM-L6-v2'
-            self.model = SentenceTransformer(self.model_name)
-            logging.info(f"Using Sentence Transformers embeddings with model {self.model_name}")
-            return
-        elif self.provider == 'together' and TOGETHER_AVAILABLE:
+        if self.provider == 'together' and TOGETHER_AVAILABLE:
             # Always use the correct model name for Together AI
             self.model_name = 'togethercomputer/m2-bert-80M-8k-retrieval'
             logging.info(f"Using Together AI embeddings with model {self.model_name}")
-            return
-        elif self.provider == 'openai' and OPENAI_AVAILABLE:
-            self.model_name = self.model_name or 'text-embedding-3-small'
-            logging.info(f"Using OpenAI embeddings with model {self.model_name}")
             return
         elif self.provider == 'cohere' and COHERE_AVAILABLE:
             self.model_name = self.model_name or 'embed-english-v3.0'
@@ -134,25 +102,6 @@ class EmbeddingService:
             # Fall back to fallback provider
             self.provider = 'fallback'
             logging.warning(f"Requested provider not available. Using fallback random embeddings.")
-
-    def _generate_openai_embeddings(self, texts: List[str]) -> List[List[float]]:
-        """Generate embeddings using OpenAI API.
-
-        Args:
-            texts: List of text strings
-
-        Returns:
-            List of embedding vectors
-        """
-        try:
-            response = openai.embeddings.create(
-                model=self.model_name,
-                input=texts
-            )
-            return [item.embedding for item in response.data]
-        except Exception as e:
-            logging.error(f"Error generating OpenAI embeddings: {str(e)}")
-            return self._generate_fallback_embeddings(texts)
 
     def _generate_cohere_embeddings(self, texts: List[str]) -> List[List[float]]:
         """Generate embeddings using Cohere API.
@@ -232,22 +181,6 @@ class EmbeddingService:
             logging.error(f"Error generating Together AI embeddings: {str(e)}")
             return self._generate_fallback_embeddings(texts)
 
-    def _generate_sentence_transformer_embeddings(self, texts: List[str]) -> List[List[float]]:
-        """Generate embeddings using Sentence Transformers.
-
-        Args:
-            texts: List of text strings
-
-        Returns:
-            List of embedding vectors
-        """
-        try:
-            embeddings = self.model.encode(texts)
-            return embeddings.tolist()
-        except Exception as e:
-            logging.error(f"Error generating Sentence Transformers embeddings: {str(e)}")
-            return self._generate_fallback_embeddings(texts)
-
     def _generate_fallback_embeddings(self, texts: List[str]) -> List[List[float]]:
         """Generate fallback random embeddings.
 
@@ -290,14 +223,8 @@ class EmbeddingService:
         if self.provider == 'together':
             embeddings = self._generate_together_embeddings([text_key])
             return embeddings[0]
-        elif self.provider == 'openai':
-            embeddings = self._generate_openai_embeddings([text_key])
-            return embeddings[0]
         elif self.provider == 'cohere':
             embeddings = self._generate_cohere_embeddings([text_key])
-            return embeddings[0]
-        elif self.provider == 'sentence-transformers':
-            embeddings = self._generate_sentence_transformer_embeddings([text_key])
             return embeddings[0]
         else:
             # Fallback embeddings
@@ -321,12 +248,8 @@ class EmbeddingService:
         # Route directly to the appropriate batch method for maximum efficiency
         if self.provider == 'together':
             return self._generate_together_embeddings(texts)
-        elif self.provider == 'openai':
-            return self._generate_openai_embeddings(texts)
         elif self.provider == 'cohere':
             return self._generate_cohere_embeddings(texts)
-        elif self.provider == 'sentence-transformers':
-            return self._generate_sentence_transformer_embeddings(texts)
         else:
             return self._generate_fallback_embeddings(texts)
 
@@ -342,15 +265,11 @@ class EmbeddingService:
         """
         if self.provider == 'together':
             return 768  # Together AI m2-bert-80M-8k-retrieval dimension
-        elif self.provider == 'openai':
-            return 1536  # OpenAI text-embedding-3-small dimension
         elif self.provider == 'cohere':
             return 1024  # Cohere embed-english-v3.0 dimension
-        elif self.provider == 'sentence-transformers':
-            return 384  # all-MiniLM-L6-v2 dimension
         else:
-            # Fallback dimension
-            return 384
+            # Fallback dimension - use Together AI dimension as default
+            return 768
 
 # Create a singleton instance optimized for deployment
 embedding_service = EmbeddingService(provider='together')  # Use Together AI for deployment

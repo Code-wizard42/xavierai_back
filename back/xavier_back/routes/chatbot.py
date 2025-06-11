@@ -12,19 +12,26 @@ import io
 import logging
 from functools import wraps
 from flask_cors import cross_origin, CORS
-from PIL import Image
 import time
 
-from xavier_back.models import Chatbot, ChatbotAvatar, Feedback
-from xavier_back.extensions import db
-from xavier_back.services.chatbot_service import ChatbotService
-from xavier_back.services.analytics_service import AnalyticsService
-from xavier_back.services.ticket_service import TicketService
-from xavier_back.utils.auth_utils import login_required
-from xavier_back.utils.response_utils import optimize_json_response, paginated_response, with_pagination
-from xavier_back.utils.subscription_utils import check_chatbot_limit
-from xavier_back.middleware.subscription_middleware import subscription_required
-from xavier_back.middleware.chatbot_access_middleware import public_chatbot_subscription_required
+# Try to import OpenCV, fallback to basic processing if not available
+try:
+    import cv2
+    import numpy as np
+    OPENCV_AVAILABLE = True
+except ImportError:
+    OPENCV_AVAILABLE = False
+
+from models import Chatbot, ChatbotAvatar, Feedback
+from extensions import db
+from services.chatbot_service import ChatbotService
+from services.analytics_service import AnalyticsService
+from services.ticket_service import TicketService
+from utils.auth_utils import login_required
+from utils.response_utils import optimize_json_response, paginated_response, with_pagination
+from utils.subscription_utils import check_chatbot_limit
+from middleware.subscription_middleware import subscription_required
+from middleware.chatbot_access_middleware import public_chatbot_subscription_required
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR)
@@ -35,7 +42,7 @@ chatbot_bp = Blueprint('chatbot', __name__)
 
 # Constants for file uploads
 UPLOAD_FOLDER = 'static/uploads/avatars'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 def allowed_file(filename):
     """Check if a filename has an allowed extension"""
@@ -433,7 +440,7 @@ def get_chatbot_customization(chatbot_id):
         current_app.logger.info(f"Getting customization settings for chatbot {chatbot_id}")
         
         # Use service to get chatbot but skip cache to ensure we have latest data
-        from xavier_back.utils.cache_utils import cache_invalidate
+        from utils.cache_utils import cache_invalidate
         cache_key_prefix = f"chatbot:{chatbot_id}"
         cache_invalidate(cache_key_prefix)
         current_app.logger.info(f"Invalidated cache for prefix {cache_key_prefix}")
@@ -560,29 +567,93 @@ def customize_chatbot(chatbot_id):
 @chatbot_bp.route('/chatbot/<chatbot_id>/upload-avatar', methods=['POST'])
 @handle_errors
 def upload_avatar(chatbot_id):
-    """Upload an avatar image for a chatbot"""
+    """Upload and process avatar image for a chatbot"""
     try:
-        if 'avatar' not in request.files:
+        logger.info(f"Avatar upload request for chatbot {chatbot_id}")
+        logger.info(f"Request files: {list(request.files.keys())}")
+        
+        # Check if file is in request (support both 'avatar' and 'file' field names)
+        file = None
+        if 'avatar' in request.files:
+            file = request.files['avatar']
+            logger.info("Found file in 'avatar' field")
+        elif 'file' in request.files:
+            file = request.files['file']
+            logger.info("Found file in 'file' field")
+        else:
+            logger.warning(f"No file found in request. Available fields: {list(request.files.keys())}")
             return jsonify({"error": "No file provided"}), 400
 
-        file = request.files['avatar']
         if file.filename == '':
+            logger.warning("Empty filename provided")
             return jsonify({"error": "No file selected"}), 400
+        
+        logger.info(f"Processing file: {file.filename}")
 
         if file and allowed_file(file.filename):
             # Process the image
             try:
-                # Open the image and resize it
-                img = Image.open(file)
-                img = img.convert('RGB')  # Convert to RGB to ensure JPEG compatibility
+                if OPENCV_AVAILABLE:
+                    logger.info("Using OpenCV for image processing")
+                    # Read image data
+                    file_bytes = np.frombuffer(file.read(), np.uint8)
+                    img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+                    
+                    if img is None:
+                        return jsonify({"error": "Invalid image file"}), 400
 
-                # Resize to a reasonable size (e.g., 200x200 pixels)
-                img.thumbnail((200, 200))
+                    # Convert BGR to RGB (OpenCV uses BGR by default)
+                    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-                # Save to a bytes buffer
-                img_buffer = io.BytesIO()
-                img.save(img_buffer, format='JPEG', quality=85)
-                image_data = img_buffer.getvalue()
+                    # Resize to 200x200 while maintaining aspect ratio
+                    height, width = img_rgb.shape[:2]
+                    
+                    # Calculate the scaling factor to fit within 200x200
+                    scale = min(200/width, 200/height)
+                    new_width = int(width * scale)
+                    new_height = int(height * scale)
+                    
+                    # Resize the image
+                    img_resized = cv2.resize(img_rgb, (new_width, new_height), interpolation=cv2.INTER_AREA)
+                    
+                    # Create a 200x200 canvas and center the image
+                    canvas = np.ones((200, 200, 3), dtype=np.uint8) * 255  # White background
+                    y_offset = (200 - new_height) // 2
+                    x_offset = (200 - new_width) // 2
+                    canvas[y_offset:y_offset+new_height, x_offset:x_offset+new_width] = img_resized
+
+                    # Convert back to BGR for JPEG encoding
+                    img_bgr = cv2.cvtColor(canvas, cv2.COLOR_RGB2BGR)
+                    
+                    # Encode as JPEG with quality 85
+                    success, img_encoded = cv2.imencode('.jpg', img_bgr, [cv2.IMWRITE_JPEG_QUALITY, 85])
+                    
+                    if not success:
+                        return jsonify({"error": "Failed to encode image"}), 500
+                    
+                    image_data = img_encoded.tobytes()
+                    content_type = 'image/jpeg'
+                else:
+                    logger.info("Using basic image processing (no resizing)")
+                    # Fallback: store raw image without processing
+                    file.seek(0)
+                    image_data = file.read()
+                    
+                    # Basic validation - check file size
+                    max_size = 5 * 1024 * 1024  # 5MB limit
+                    if len(image_data) > max_size:
+                        return jsonify({"error": "File too large. Maximum size is 5MB."}), 400
+                    
+                    # Determine content type based on file extension
+                    ext = file.filename.lower().split('.')[-1] if '.' in file.filename else ''
+                    content_type_map = {
+                        'jpg': 'image/jpeg',
+                        'jpeg': 'image/jpeg',
+                        'png': 'image/png',
+                        'gif': 'image/gif',
+                        'webp': 'image/webp'
+                    }
+                    content_type = content_type_map.get(ext, 'image/jpeg')
 
                 # Generate a unique filename
                 filename = f"{chatbot_id}_{secure_filename(file.filename)}"
@@ -593,18 +664,20 @@ def upload_avatar(chatbot_id):
                     # Update existing avatar
                     existing_avatar.filename = filename
                     existing_avatar.image_data = image_data
-                    existing_avatar.content_type = 'image/jpeg'
+                    existing_avatar.content_type = content_type
                     db.session.commit()
+                    logger.info(f"Updated existing avatar for chatbot {chatbot_id}")
                 else:
                     # Create new avatar record
                     new_avatar = ChatbotAvatar(
                         chatbot_id=chatbot_id,
                         filename=filename,
                         image_data=image_data,
-                        content_type='image/jpeg'
+                        content_type=content_type
                     )
                     db.session.add(new_avatar)
                     db.session.commit()
+                    logger.info(f"Created new avatar for chatbot {chatbot_id}")
 
                 # Generate URL for the saved image
                 avatar_url = url_for('chatbot.get_avatar_image', chatbot_id=chatbot_id, _external=True)

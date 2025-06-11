@@ -10,9 +10,9 @@ from flask import current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import SQLAlchemyError
 
-from xavier_back.extensions import db
-from xavier_back.models import User
-from xavier_back.firebase_config import verify_firebase_token
+from extensions import db
+from models import User
+from firebase_config import verify_firebase_token
 
 logger = logging.getLogger(__name__)
 

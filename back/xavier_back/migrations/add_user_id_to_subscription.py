@@ -3,7 +3,7 @@ Migration script to add user_id column to subscription table and fix relationshi
 """
 import logging
 from xavier_back import create_app
-from xavier_back.extensions import db
+from extensions import db
 from sqlalchemy import text
 
 logger = logging.getLogger(__name__)

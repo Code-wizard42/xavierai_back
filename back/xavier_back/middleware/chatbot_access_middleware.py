@@ -6,8 +6,8 @@ It specifically checks if the user's subscription is active and billing is up to
 """
 from functools import wraps
 from flask import request, jsonify, session, current_app
-from xavier_back.services.subscription_service import SubscriptionService
-from xavier_back.services.conversation_limit_service import ConversationLimitService
+from services.subscription_service import SubscriptionService
+from services.conversation_limit_service import ConversationLimitService
 
 
 def chatbot_subscription_required(f):
@@ -32,7 +32,7 @@ def chatbot_subscription_required(f):
 
         # Check if chatbot exists and get owner information
         # Use direct query to avoid cached detached instances
-        from xavier_back.models import Chatbot
+        from models import Chatbot
         chatbot = Chatbot.query.get(chatbot_id)
         if not chatbot:
             current_app.logger.warning(f"Chatbot not found: {chatbot_id}")
@@ -57,7 +57,7 @@ def chatbot_subscription_required(f):
             }), 402  # Payment Required status code
         
         # Check if subscription billing is overdue
-        from xavier_back.models import User
+        from models import User
         user = User.query.get(user_id)
         if user and user.subscription and user.subscription.is_billing_overdue():
             current_app.logger.warning(f"User {user_id} chatbot {chatbot_id} blocked due to overdue billing")
@@ -92,7 +92,7 @@ def public_chatbot_subscription_required(f):
 
         # Check if chatbot exists and get owner information
         # Use direct query to avoid cached detached instances
-        from xavier_back.models import Chatbot
+        from models import Chatbot
         chatbot = Chatbot.query.get(chatbot_id)
         if not chatbot:
             current_app.logger.warning(f"Chatbot not found: {chatbot_id}")
@@ -116,7 +116,7 @@ def public_chatbot_subscription_required(f):
             }), 503  # Service Unavailable status code
         
         # Check if subscription billing is overdue
-        from xavier_back.models import User
+        from models import User
         user = User.query.get(user_id)
         if user and user.subscription and user.subscription.is_billing_overdue():
             current_app.logger.warning(f"Public access to chatbot {chatbot_id} blocked - owner billing overdue")

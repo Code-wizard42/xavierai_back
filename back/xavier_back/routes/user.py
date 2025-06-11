@@ -8,9 +8,9 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import ValidationError
 
-from xavier_back.extensions import db
-from xavier_back.models import User, NotificationPreference
-from xavier_back.schemas import NotificationPreferenceSchema
+from extensions import db
+from models import User, NotificationPreference
+from schemas import NotificationPreferenceSchema
 
 logger = logging.getLogger(__name__)
 

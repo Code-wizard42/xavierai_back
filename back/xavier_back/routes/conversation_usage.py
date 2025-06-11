@@ -5,10 +5,10 @@ This module contains routes for managing conversation usage and limits.
 """
 
 from flask import Blueprint, request, jsonify, session
-from xavier_back.utils.auth_utils import login_required
-from xavier_back.middleware.subscription_middleware import subscription_required
-from xavier_back.services.conversation_limit_service import ConversationLimitService
-from xavier_back.utils.response_utils import optimize_json_response
+from utils.auth_utils import login_required
+from middleware.subscription_middleware import subscription_required
+from services.conversation_limit_service import ConversationLimitService
+from utils.response_utils import optimize_json_response
 import logging
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ def get_chatbot_usage(chatbot_id):
         user_id = session.get('user_id')
         
         # First check if the user owns this chatbot
-        from xavier_back.services.chatbot_service import ChatbotService
+        from services.chatbot_service import ChatbotService
         chatbot = ChatbotService.get_chatbot(chatbot_id)
         
         if not chatbot or chatbot.user_id != user_id:
@@ -76,7 +76,7 @@ def check_conversation_limit(chatbot_id):
         user_id = session.get('user_id')
         
         # First check if the user owns this chatbot
-        from xavier_back.services.chatbot_service import ChatbotService
+        from services.chatbot_service import ChatbotService
         chatbot = ChatbotService.get_chatbot(chatbot_id)
         
         if not chatbot or chatbot.user_id != user_id:
@@ -111,7 +111,7 @@ def get_usage_dashboard():
             return jsonify(current_summary), 500
         
         # Get subscription info for plan details
-        from xavier_back.services.subscription_service import SubscriptionService
+        from services.subscription_service import SubscriptionService
         subscription_data = SubscriptionService.get_user_subscription(user_id)
         
         dashboard_data = {

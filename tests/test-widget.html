@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Chatbot Widget - Structured Responses</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-question {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h1>Chatbot Widget Test - Structured Responses</h1>
+        <p>This page tests the improved chatbot widget formatting for structured responses.</p>
+        
+        <h3>Test Questions to Try:</h3>
+        <div class="test-question">❓ "what can i use your platform for"</div>
+        <div class="test-question">❓ "list all the features you platform has"</div>
+        <div class="test-question">❓ "how much does it cost"</div>
+        <div class="test-question">❓ "how do I set up the chatbot"</div>
+        
+        <p><strong>Expected Behavior:</strong> The responses should now show properly formatted numbered lists with good spacing instead of squished text with literal **bold** marks.</p>
+    </div>
+
+    <!-- Chatbot Widget Script -->
+    <script 
+        src="http://localhost:5000/static/js/widget.js"
+        data-api="http://localhost:5000/"
+        data-id="test-chatbot-debug"
+        data-name="Xavier AI Assistant"
+        data-theme="#0066CC"
+        data-enable-tickets="true"
+        data-enable-leads="true"
+        data-enable-sentiment="true"
+        data-radius="45">
+    </script>
+</body>
+</html> 

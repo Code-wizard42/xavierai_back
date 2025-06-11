@@ -10,28 +10,28 @@ from logging.handlers import RotatingFileHandler
 from flask import Flask, request, jsonify, make_response, session
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from xavier_back.config import Config
-from xavier_back.extensions import db, migrate
-from xavier_back.routes.auth import auth_bp
-from xavier_back.routes.chatbot import chatbot_bp
-from xavier_back.routes.analytics import analytics_bp
-from xavier_back.routes.leads import leads_bp
-from xavier_back.routes.email_service import email_bp
-from xavier_back.routes.user import user_bp
-from xavier_back.routes.conversation_usage import conversation_usage_bp
-from xavier_back.routes.admin import admin_bp
+from config import Config
+from extensions import db, migrate
+from routes.auth import auth_bp
+from routes.chatbot import chatbot_bp
+from routes.analytics import analytics_bp
+from routes.leads import leads_bp
+from routes.email_service import email_bp
+from routes.user import user_bp
+from routes.conversation_usage import conversation_usage_bp
+from routes.admin import admin_bp
 import time
-from xavier_back.logging_config import configure_logging
+from logging_config import configure_logging
 from sqlalchemy import Text
 from sqlalchemy.dialects import postgresql
-from xavier_back.models import User  # Add this import
+from models import User  # Add this import
 from werkzeug.middleware.proxy_fix import ProxyFix
-from xavier_back.firebase_config import initialize_firebase
+from firebase_config import initialize_firebase
 from flask_session import Session
 from flask_compress import Compress
 import functools
-import xavier_back.ensure_env as ensure_env
-from xavier_back.utils.log_utils import log_api_request
+import ensure_env as ensure_env
+from utils.log_utils import log_api_request
 
 # Set environment variable for development mode
 if not os.environ.get('FLASK_ENV') and not os.environ.get('ENVIRONMENT'):
@@ -64,8 +64,16 @@ def create_app(test_config=None):
     # Configure logging with the app
     configure_logging(app)
 
-    # Ensure instance folder exists
-    os.makedirs(app.instance_path, exist_ok=True)
+    # Ensure instance folder exists (only if writable)
+    try:
+        os.makedirs(app.instance_path, exist_ok=True)
+    except PermissionError:
+        logger.warning(f"Cannot create instance directory at {app.instance_path}, using temp directory")
+        # Use a temp directory instead
+        import tempfile
+        app.instance_path = tempfile.gettempdir()
+    except Exception as e:
+        logger.warning(f"Error creating instance directory: {str(e)}")
 
     # Configure CORS
     CORS(app, supports_credentials=True, 
@@ -366,7 +374,7 @@ def create_app(test_config=None):
     app.register_blueprint(user_bp, url_prefix='/user')
 
     # Register subscription blueprint
-    from xavier_back.routes.subscription import subscription_bp
+    from routes.subscription import subscription_bp
     app.register_blueprint(subscription_bp, url_prefix='/subscription')
 
     # Register conversation usage blueprint
@@ -374,8 +382,8 @@ def create_app(test_config=None):
     app.register_blueprint(admin_bp, url_prefix='/api')
 
     # Register WhatsApp integration blueprints
-    from xavier_back.routes.whatsapp import whatsapp_bp
-    from xavier_back.routes.whatsapp_config import whatsapp_config_bp
+    from routes.whatsapp import whatsapp_bp
+    from routes.whatsapp_config import whatsapp_config_bp
     app.register_blueprint(whatsapp_bp, url_prefix='/whatsapp')
     app.register_blueprint(whatsapp_config_bp, url_prefix='/whatsapp')
 
@@ -383,7 +391,7 @@ def create_app(test_config=None):
     with app.app_context():
         try:
             # Import the migration tracker
-            from xavier_back.utils.migration_tracker import is_migration_applied, mark_migration_applied
+            from utils.migration_tracker import is_migration_applied, mark_migration_applied
             
             # Only create tables if not already done
             if not is_migration_applied('create_all_tables'):
@@ -409,7 +417,7 @@ def create_app(test_config=None):
             if not is_migration_applied('paypal_columns'):
                 try:
                     logger.info("Running PayPal columns migration")
-                    from xavier_back.migrations.add_paypal_columns import run_migration as add_paypal_columns_migration
+                    from migrations.add_paypal_columns import run_migration as add_paypal_columns_migration
                     add_paypal_columns_migration()
                     mark_migration_applied('paypal_columns')
                 except Exception as e:
@@ -419,7 +427,7 @@ def create_app(test_config=None):
             if not is_migration_applied('lemonsqueezy_columns'):
                 try:
                     logger.info("Running Lemon Squeezy columns migration")
-                    from xavier_back.migrations.add_lemonsqueezy_columns import run_migration as add_lemonsqueezy_columns_migration
+                    from migrations.add_lemonsqueezy_columns import run_migration as add_lemonsqueezy_columns_migration
                     add_lemonsqueezy_columns_migration()
                     mark_migration_applied('lemonsqueezy_columns')
                 except Exception as e:
@@ -429,7 +437,7 @@ def create_app(test_config=None):
             if not is_migration_applied('flutterwave_columns'):
                 try:
                     logger.info("Running Flutterwave columns migration")
-                    from xavier_back.migrations.add_flutterwave_columns import run_migration as add_flutterwave_columns_migration
+                    from migrations.add_flutterwave_columns import run_migration as add_flutterwave_columns_migration
                     add_flutterwave_columns_migration()
                     mark_migration_applied('flutterwave_columns')
                 except Exception as e:
@@ -437,7 +445,7 @@ def create_app(test_config=None):
 
             # Automatically initialize subscription plans if none exist
             try:
-                from xavier_back.routes.subscription import init_plans
+                from routes.subscription import init_plans
                 init_plans()
                 logger.info("Subscription plans initialized successfully")
             except Exception as e:
@@ -445,7 +453,7 @@ def create_app(test_config=None):
                 
             # Initialize and start the scheduler
             try:
-                from xavier_back.extensions import init_scheduler
+                from extensions import init_scheduler
                 init_scheduler(app)
                 logger.info("Scheduler initialized and started successfully")
             except Exception as e:
@@ -467,7 +475,7 @@ def create_app(test_config=None):
     @app.route('/subscription-status')
     def subscription_status():
         """Check current user's subscription status."""
-        from xavier_back.services.subscription_service import SubscriptionService
+        from services.subscription_service import SubscriptionService
         
         user_id = session.get('user_id')
         if not user_id:
@@ -482,10 +490,10 @@ def create_app(test_config=None):
         })
 
     # Run database migrations if needed
-    from xavier_back.migrations import run_migrations
+    from migrations import run_migrations
 
     # Add our custom migration for fixing user-subscription relationships
-    from xavier_back.migrations.fix_user_subscription_relationship import run_migration as fix_subscriptions
+    from migrations.fix_user_subscription_relationship import run_migration as fix_subscriptions
 
     # Run migrations on startup instead of using before_first_request which is deprecated
     def run_startup_tasks():
@@ -494,7 +502,7 @@ def create_app(test_config=None):
         This includes running database migrations.
         """
         # Import the migration tracker
-        from xavier_back.utils.migration_tracker import is_migration_applied, mark_migration_applied
+        from utils.migration_tracker import is_migration_applied, mark_migration_applied
         
         # Run database migrations if not already applied
         if not is_migration_applied('alembic_migrations'):

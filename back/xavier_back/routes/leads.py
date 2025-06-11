@@ -8,10 +8,10 @@ from flask import Blueprint, request, jsonify, session, current_app
 import logging
 from functools import wraps
 
-from xavier_back.models import Lead
-from xavier_back.extensions import db
-from xavier_back.services.lead_service import LeadService
-from xavier_back.utils.auth_utils import login_required
+from models import Lead
+from extensions import db
+from services.lead_service import LeadService
+from utils.auth_utils import login_required
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR)

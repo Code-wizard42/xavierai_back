@@ -282,7 +282,7 @@ def cache_set(key: str, value: Any, ttl: int = 300) -> bool:
     in_memory_ttl[key] = time.time() + ttl
     
     # Clean expired in-memory cache entries if we have too many
-    if len(in_memory_cache) > 1000:  # Limit cache size
+    if len(in_memory_cache) > 100:  # Reduced from 1000 to save memory
         current_time = time.time()
         # Get expired keys
         expired_keys = [k for k, expire_time in in_memory_ttl.items() 
@@ -293,6 +293,17 @@ def cache_set(key: str, value: Any, ttl: int = 300) -> bool:
                 del in_memory_cache[k]
             if k in in_memory_ttl:
                 del in_memory_ttl[k]
+        
+        # If still too many entries, remove oldest ones
+        if len(in_memory_cache) > 100:
+            # Sort by TTL and remove oldest
+            sorted_items = sorted(in_memory_ttl.items(), key=lambda x: x[1])
+            keys_to_remove = [k for k, _ in sorted_items[:50]]  # Remove 50 oldest
+            for k in keys_to_remove:
+                if k in in_memory_cache:
+                    del in_memory_cache[k]
+                if k in in_memory_ttl:
+                    del in_memory_ttl[k]
     
     return True
 

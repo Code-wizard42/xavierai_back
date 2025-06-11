@@ -17,16 +17,16 @@ scheduler = APScheduler()
 # inventory_collection = mongo_db['inventory']
 
 def init_db(app):
-    # Configure SQLAlchemy pool settings
+    # Configure SQLAlchemy pool settings - optimized for memory usage
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        'pool_size': 20,  # Increased for handling multiple streams
+        'pool_size': 5,  # Reduced from 20 to save memory
         'pool_timeout': 30,
         'pool_recycle': 1800,  # Recycle connections after 30 minutes
-        'max_overflow': 40,
+        'max_overflow': 10,  # Reduced from 40
         'pool_pre_ping': True
     }
     
-    db.init_app(app)
+    db.init_app(app, db)
     migrate.init_app(app, db)
     
 def init_scheduler(app):
@@ -39,7 +39,7 @@ def init_scheduler(app):
     scheduler.init_app(app)
     
     # Add scheduled tasks
-    from xavier_back.utils.scheduled_tasks import run_daily_tasks
+    from utils.scheduled_tasks import run_daily_tasks
     
     # Wrap the daily tasks with app context
     def run_daily_tasks_with_context():

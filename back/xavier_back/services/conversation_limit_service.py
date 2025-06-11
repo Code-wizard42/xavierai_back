@@ -7,10 +7,10 @@ This service manages conversation limits and usage tracking for chatbots.
 from typing import Dict, Any, Optional, Tuple
 from datetime import datetime, timezone
 import logging
-from xavier_back.extensions import db
-from xavier_back.models.conversation_usage import ConversationUsage
-from xavier_back.models import Chatbot, User, Plan
-from xavier_back.services.subscription_service import SubscriptionService
+from extensions import db
+from models.conversation_usage import ConversationUsage
+from models import Chatbot, User, Plan
+from services.subscription_service import SubscriptionService
 
 logger = logging.getLogger(__name__)
 

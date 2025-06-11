@@ -99,15 +99,15 @@ class Config:
     GOOGLE_REDIRECT_URI = os.getenv('GOOGLE_REDIRECT_URI', 'http://localhost:5000/oauth2callback')
 
     # PayPal settings
-    PAYPAL_CLIENT_ID = os.getenv('PAYPAL_CLIENT_ID', 'ARY9AnNhLAwaCDoEz10K2g5n63Zn5ZCIUd68heQIp-Ydvpn_14_1CE4LDgRaywZu3NCxW9U5d-_zu-u9')
-    PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET', 'EKO3ruS2OND3zszBF6m54y8B8itxO2SereVrvReosTWPP6PwHwHpFeBDXiOmZ85FF8jxafwenvbSoecQ')
-    PAYPAL_API_BASE = os.getenv('PAYPAL_API_BASE', 'https://api-m.sandbox.paypal.com')  # Use sandbox by default
-    PAYPAL_APP_NAME = os.getenv('PAYPAL_APP_NAME', 'testXavierai')
+    PAYPAL_CLIENT_ID = os.getenv('PAYPAL_CLIENT_ID', '')
+    PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET', '')
+    PAYPAL_API_BASE = os.getenv('PAYPAL_API_BASE', '')  # Use sandbox by default
+    PAYPAL_APP_NAME = os.getenv('PAYPAL_APP_NAME', '')
 
     # Paystack settings
-    PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY','sk_test_4fb976a4f8413ce76b5bc233740cb9954ace7afd')
-    PAYSTACK_PUBLIC_KEY = os.getenv('PAYSTACK_PUBLIC_KEY','pk_test_d838926de168eb785971f8c46408f8e2ad42918e')
-    PAYSTACK_API_BASE = os.getenv('PAYSTACK_API_BASE', 'https://api.paystack.co')
+    PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY','')
+    PAYSTACK_PUBLIC_KEY = os.getenv('PAYSTACK_PUBLIC_KEY','')
+    PAYSTACK_API_BASE = os.getenv('PAYSTACK_API_BASE', '')
     
     # Subscription settings
     RENEWAL_REMINDER_DAYS = [7, 3, 1]  # Send reminders 7, 3, and 1 day before renewal

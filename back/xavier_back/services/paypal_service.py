@@ -13,9 +13,9 @@ from datetime import datetime, timezone, timedelta
 import requests
 from sqlalchemy.exc import SQLAlchemyError
 
-from xavier_back.extensions import db
-from xavier_back.models import User, Subscription, Plan, PaymentHistory
-from xavier_back.config import Config
+from extensions import db
+from models import User, Subscription, Plan, PaymentHistory
+from config import Config
 
 # Configure logging
 logger = logging.getLogger(__name__)

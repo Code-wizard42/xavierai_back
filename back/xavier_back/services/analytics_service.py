@@ -13,10 +13,10 @@ from sqlalchemy import func, text, desc, and_
 from sqlalchemy.exc import SQLAlchemyError
 import nltk
 
-from xavier_back.extensions import db
-from xavier_back.models.question_analytics import QuestionAnalytics
-from xavier_back.models.sentiment_analytics import SentimentAnalytics
-from xavier_back.utils.cache_utils import cached, cache
+from extensions import db
+from models.question_analytics import QuestionAnalytics
+from models.sentiment_analytics import SentimentAnalytics
+from utils.cache_utils import cached, cache
 
 logger = logging.getLogger(__name__)
 
